@@ -12,7 +12,10 @@ import { useDebounce } from "rooks";
 import { createContact, getContacts } from "../contacts";
 import { useQuery, useIsFetching } from "@tanstack/react-query";
 
-const contactListQuery = (q) => ({
+// import Nav from '../components/Nav';
+const Nav = React.lazy(() => import('../components/Nav'));
+
+export const contactListQuery = (q) => ({
   queryKey: ["contacts", "list", q ?? "all"],
   queryFn: () => getContacts(q),
 });
@@ -26,7 +29,8 @@ export const loader =
       await queryClient.fetchQuery(contactListQuery(q));
     }
     return { q };
-  };
+    };
+  
 
 export const action = (queryClient) => async () => {
   const contact = await createContact();
@@ -70,35 +74,9 @@ export default function Root() {
             <button type="submit">New</button>
           </Form>
         </div>
-        <nav>
-          {contacts.length ? (
-            <ul>
-              {contacts.map((contact) => (
-                <li key={contact.id}>
-                  <NavLink
-                    to={`contacts/${contact.id}`}
-                    className={({ isActive, isPending }) =>
-                      isActive ? "active" : isPending ? "pending" : ""
-                    }
-                  >
-                    {contact.first || contact.last ? (
-                      <>
-                        {contact.first} {contact.last}
-                      </>
-                    ) : (
-                      <i>No Name</i>
-                    )}{" "}
-                    {contact.favorite && <span>★</span>}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p>
-              <i>No contacts</i>
-            </p>
-          )}
-        </nav>
+        <React.Suspense fallback={"Loading..."}>
+          <Nav />
+        </React.Suspense>
       </div>
       <div
         id="detail"
